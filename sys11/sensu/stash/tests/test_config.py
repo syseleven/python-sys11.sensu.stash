@@ -3,6 +3,7 @@ from sys11.sensu.stash.conf import cfg
 def test_defaults():
     assert cfg.get('DEFAULT', 'redis_host') == 'localhost'
     assert cfg.get('DEFAULT', 'redis_port') == '6379'
+    assert cfg.get('DEFAULT', 'notifier') == 'mailnotifier'
 
     assert 'mailnotifier' in cfg.sections()
 

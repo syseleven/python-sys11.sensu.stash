@@ -5,6 +5,7 @@ from six.moves import configparser
 config_defaults = {
         'redis_host': 'localhost',
         'redis_port': '6379',
+        'notifier': 'mailnotifier',
         }
 
 cfg = configparser.ConfigParser(defaults=config_defaults)

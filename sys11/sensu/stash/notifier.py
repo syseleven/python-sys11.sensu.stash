@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import os
 import smtplib
 import jinja2
@@ -19,17 +20,17 @@ class BaseNotifier(object):
         raise NotImplementedError
 
 
-class NoopNofifier(BaseNotifier):
+class NoopNotifier(BaseNotifier):
 
     def send(self, stash_name, reason):
         """Does nothing"""
-        pass
+        print("Stash:", stash_name, "Reason:", reason)
 
 
 class MailNotifier(BaseNotifier):
 
     def __init__(self, cfg):
-        self._smpt_host = cfg.get('mailnotifier', 'smtp_host')
+        self._smtp_host = cfg.get('mailnotifier', 'smtp_host')
         self._smtp_port = cfg.get('mailnotifier', 'smtp_port')
         self._from = cfg.get('mailnotifier', 'from')
         self._to = cfg.get('mailnotifier', 'to')
@@ -68,12 +69,18 @@ class MailNotifier(BaseNotifier):
         msg.attach(MIMEText(msg_text, _charset='utf-8'))
         return msg
 
+    @staticmethod
+    def _convert_for_mail(in_):
+        """Converts in into six.text_type, if necessary"""
+        if not isinstance(in_, six.text_type):
+            return in_.decode('utf-8', errors='ignore')
+        return in_
+
     def send(self, stash_name, reason):
-        if not isinstance(stash_name, six.text_type):
-            stash_name = stash_name.decode('utf-8', errors='ignore')
-        if not isinstance(reason, six.text_type):
-            reason = reason.decode('utf-8', errors='ignore')
-        conn = smtplib.SMTP(self._smpt_host, self._smtp_port)
+        stash_name = self._convert_for_mail(stash_name)
+        reason = self._convert_for_mail(reason)
+
+        conn = smtplib.SMTP(self._smtp_host, self._smtp_port)
         msg = self._build_msg(stash_name, reason)
         conn.sendmail(self._from, self._to, msg.as_string())
         conn.quit()
