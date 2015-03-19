@@ -5,6 +5,7 @@ import re
 import redis
 import json
 import logging
+import logging.config
 import argparse
 import pkg_resources
 
@@ -12,6 +13,7 @@ from sys11.sensu.stash.conf import cfg
 
 pat = re.compile('__keyspace@[^:]+:(.*)')
 default_config_file = '/etc/sensu/stash_notifier.cfg'
+log = logging.getLogger('sys11.sensu.stash')
 
 
 def get_notifier(name):
@@ -40,6 +42,7 @@ def listen(redis_conn, notifier):
                     pass
                 except ValueError:
                     pass
+            log.info('Sending infos about %s via %s', keyname, repr(notifier))
             notifier.send(keyname, reason)
 
 def setup_args():
@@ -62,6 +65,11 @@ def main():
         if not notifier:
             print("Unable to find requested notifier", cfg.get('DEFAULT', 'notifier'))
             exit(1)
+        if os.path.isfile(cfg.get('DEFAULT', 'logging')):
+            logging.config.fileConfig(cfg.get('DEFAULT', 'logging'))
+        else:
+            logging.basicConfig()
+        log.setLevel(logging.INFO)
         redis_conn = redis.StrictRedis(host=cfg.get('DEFAULT', 'redis_host'),
                                        port=cfg.get('DEFAULT', 'redis_port'))
 

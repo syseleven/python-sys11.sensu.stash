@@ -6,6 +6,7 @@ config_defaults = {
         'redis_host': 'localhost',
         'redis_port': '6379',
         'notifier': 'mailnotifier',
+        'logging': '/etc/sensu/stash_notifier_logging.cfg',
         }
 
 cfg = configparser.ConfigParser(defaults=config_defaults)
