@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 class PyTest(TestCommand):
@@ -35,7 +35,9 @@ setup(
             "Programming Language :: Python :: 3",
             "Topic :: System :: Monitoring",
             ],
-        packages=['sys11.sensu.stash'],
+        #packages=['sys11.sensu.stash'],
+        packages=find_packages(),
+        include_package_data=True,
         entry_points={
             'console_scripts': [
                 'stashnotifier = sys11.sensu.stash.listener:main',
