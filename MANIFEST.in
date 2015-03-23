@@ -1,3 +1,3 @@
-include *.txt
+include *.txt setup.cfg tox.ini
 recursive-include templates *.txt *.py
 recursive-include tests *.py

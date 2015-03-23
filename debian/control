@@ -1,0 +1,13 @@
+Source: sys11-sensu-stash
+Maintainer: Christoph Glaubitz <c.glaubitz@syseleven.de>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 7.4.3)
+Standards-Version: 3.9.5
+
+Package: python-sys11.sensu.stash
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: handle stashes from sensu
+ Send out notifications for new stashes
+ 

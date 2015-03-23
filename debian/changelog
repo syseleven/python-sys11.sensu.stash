@@ -1,0 +1,5 @@
+sys11-sensu-stash (0.1-1) trusty; urgency=low
+
+  * initial build of python-sys11.sensu.stash
+
+ -- Christoph Glaubitz (launchpad) <c.glaubitz@syseleven.de>  Mon, 23 Mar 2015 11:26:15 +0100

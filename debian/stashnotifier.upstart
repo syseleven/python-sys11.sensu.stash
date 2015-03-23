@@ -1,0 +1,9 @@
+description "sensu stash notifier"
+author "Christoph Glaubitz <c.glaubitz@syseleven.de>"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+
+exec start-stop-daemon --start --exec /usr/bin/stashnotifier
