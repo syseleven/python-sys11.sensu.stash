@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
+import time
 import re
 import redis
 import json
@@ -52,6 +53,22 @@ def setup_args():
         help='Config file to override defaults.')
     return parser
 
+def connect_to_redis(conf):
+    redis_conn = None
+    while redis_conn is None:
+        redis_conn = redis.StrictRedis(host=conf.get('DEFAULT', 'redis_host'),
+                                       port=int(conf.get('DEFAULT', 'redis_port')))
+        try:
+            redis_conn.ping()
+            log.info('Connection to redis %s:%s established', conf.get('DEFAULT', 'redis_host'),
+                    conf.get('DEFAULT', 'redis_port'))
+        except redis.exceptions.RedisError:
+            log.error('Unable to connect to redis %s:%s. Trying again in 10 seconds',
+                    conf.get('DEFAULT', 'redis_host'), conf.get('DEFAULT', 'redis_port'))
+            time.sleep(10)
+            redis_conn = None
+    return redis_conn
+
 def main():
     try:
         opts = setup_args().parse_args()
@@ -70,8 +87,7 @@ def main():
         else:
             logging.basicConfig()
         log.setLevel(logging.INFO)
-        redis_conn = redis.StrictRedis(host=cfg.get('DEFAULT', 'redis_host'),
-                                       port=int(cfg.get('DEFAULT', 'redis_port')))
+        redis_conn = connect_to_redis(cfg)
 
         listen(redis_conn, notifier(cfg))
     except KeyboardInterrupt:

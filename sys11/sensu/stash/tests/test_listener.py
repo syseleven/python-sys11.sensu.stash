@@ -1,6 +1,8 @@
 import pytest
+import redis
+from six.moves.configparser import ConfigParser
 from sys11.sensu.stash.notifier import MailNotifier, NoopNotifier
-from sys11.sensu.stash.listener import get_notifier, listen
+from sys11.sensu.stash.listener import get_notifier, listen, connect_to_redis
 
 def test_get_notifier():
     cls = get_notifier('mailnotifier')
@@ -69,3 +71,35 @@ def test_listen():
     assert redis_conn._get_cnt == 2
     assert notifier._send_cnt == 2
 
+class AnotherFakeRedis:
+    def __init__(self, *args, **kwargs):
+        self._call_cnt = 0
+
+    def __call__(self, *args, **kwargs):
+        self._call_cnt += 1
+        if self._call_cnt == 1:
+            raise redis.exceptions.ConnectionError('does not work')
+        elif self._call_cnt == 2:
+            raise redis.exceptions.RedisError('does not work')
+        else:
+            return 'works'
+
+class FakeSleep:
+    def __init__(self):
+        self._call_cnt = 0
+
+    def __call__(self, *args):
+        self._call_cnt += 1
+
+def test_connect_to_redis(monkeypatch):
+    fake_redis = AnotherFakeRedis()
+    fake_sleep = FakeSleep()
+    cfg = ConfigParser(defaults={'redis_host': 'localhost',
+                                 'redis_port': '1234'})
+    monkeypatch.setattr('redis.StrictRedis.ping', fake_redis)
+    monkeypatch.setattr('time.sleep', fake_sleep)
+
+    res = connect_to_redis(cfg)
+    assert isinstance(res, redis.StrictRedis)
+    assert fake_redis._call_cnt == 3
+    assert fake_sleep._call_cnt == 2
