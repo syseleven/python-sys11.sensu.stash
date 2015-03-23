@@ -71,7 +71,7 @@ def main():
             logging.basicConfig()
         log.setLevel(logging.INFO)
         redis_conn = redis.StrictRedis(host=cfg.get('DEFAULT', 'redis_host'),
-                                       port=cfg.get('DEFAULT', 'redis_port'))
+                                       port=int(cfg.get('DEFAULT', 'redis_port')))
 
         listen(redis_conn, notifier(cfg))
     except KeyboardInterrupt:
